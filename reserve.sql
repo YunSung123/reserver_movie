@@ -3,7 +3,7 @@
 -- 상영관
 create table room(
                      id bigint primary key auto_increment,
-                     name varchar(50) not null
+                     room_number int not null
 );
 
 -- 좌석

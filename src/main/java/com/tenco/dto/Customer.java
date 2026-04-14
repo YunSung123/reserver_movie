@@ -1,6 +1,4 @@
 package com.tenco.dto;
-
-import com.google.gson.Gson;
 import lombok.*;
 
 import java.time.LocalDate;
