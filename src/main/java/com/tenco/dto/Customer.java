@@ -1,5 +1,4 @@
 package com.tenco.dto;
-
 import lombok.*;
 
 import java.time.LocalDate;
@@ -17,5 +16,6 @@ public class Customer {
     private int age; // 고객 나이
     private LocalDate createAt; // 계정 생성 일시
     private boolean isAvailable; // 계정 활성화 상태
+
 
 }

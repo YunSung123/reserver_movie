@@ -38,7 +38,7 @@ public class RoomDAO {
         return false;
     }
 
-    
+
     // todo 지워야됨
     public static void main(String[] args) {
         RoomDAO dao = new RoomDAO();
@@ -50,7 +50,7 @@ public class RoomDAO {
     private Room mapToRoom(ResultSet rs) throws SQLException {
         return Room.builder()
                 .id(rs.getInt("id"))
-                .seat(rs.getInt("seat"))
+                .roomNumber(rs.getInt("seat"))
                 .isAvailable(rs.getBoolean(("is_Available")))
                 .build();
     }
