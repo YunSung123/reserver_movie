@@ -105,7 +105,7 @@ public class MoviesDAO {
 
     }
 
-    //    update(Movies)	Boolean	영화 수정
+    //    update(Movies)	Boolean	영화 수정//
     public static Boolean update(Movies movies) throws SQLException {
         Connection conn = DBConnectionManager.getConnection();
 
