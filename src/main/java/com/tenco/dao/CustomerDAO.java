@@ -152,15 +152,6 @@ public class CustomerDAO {
 
     }
 
-
-    //catch
-    // rollback
-
-    //final close true
-
-
-//view -> service -> dao -> db
-
     public static void main(String[] args) {
         CustomerDAO customerDAO = new CustomerDAO();
         Customer customer = Customer.builder()
