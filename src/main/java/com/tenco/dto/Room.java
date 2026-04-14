@@ -8,6 +8,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Room {
-    private int id; // 좌석 관리 번호
-    private int roomNumber; // 좌석 번호 (예약 시 참조됨)
+    private int id; // 상영관 관리 번호
+    private int roomNumber; // 상영관 번호 (예약 시 참조됨)
+    private boolean isAvailable; // 상영관 이용 가능 여부
 }
