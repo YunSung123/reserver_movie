@@ -90,7 +90,8 @@ public class CustomerDAO {
                 return false;
             }
 
-            List<Seat> seatList = SeatDAO.findAll();
+            SeatDAO seatDAO = new SeatDAO();
+            List<Seat> seatList = seatDAO.findAll();
 
             /**
              * room_id 는 PK값
