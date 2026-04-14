@@ -1,62 +1,57 @@
-plugins {
-    id 'java'
-}
+package com.tenco.util;
 
-group = 'com.demo'
-version = '1.0-SNAPSHOT'
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 
-repositories {
-    mavenCentral()
-}
+import java.sql.Connection;
+import java.sql.SQLException;
 
-dependencies {
-    // MySQL JDBC 드라이버 - DB 연결에 필요
-    implementation 'com.mysql:mysql-connector-j:8.4.0'
-<<<<<<< HEAD
-    // 의존성 버전 강제 정렬 설정을 통해 이행적 의존성 취약점 해결
-    constraints {
-        implementation('com.google.protobuf:protobuf-java:3.25.5')
+// DB 접근해서 Connection 객체를 생성하는 역할의 클래스 이다.
+// 싱글톤 패턴: 프로그램 전체에서 단 하나의 인스턴스만을 존재하게 하는 기법
+public class DBConnectionManager {
+
+    // static : 클래스 레벨에서 하나만 유지하는 커텍션 풀
+    private static final HikariDataSource dataSource;
+
+    // static 초기화 블록 : 클래스가 메모리에 로딩될 때 단 1번만 실행하는 녀석 보장
+    static {
+
+        HikariConfig config = new HikariConfig();
+
+        config.setJdbcUrl("jdbc:mysql://localhost:3306/reserve");
+        config.setUsername(System.getenv("DB_USER"));
+        config.setPassword(System.getenv("DB_PASSWORD"));
+
+        config.setMaximumPoolSize(10); // 동시에 유지할 연결 최대 개수
+        config.setMinimumIdle(3);     // 확보할 최소 유후 커넥션 수
+        config.setConnectionTimeout(10000); // 커넥션 할당 대기 시간 제한 (5초)
+        config.setIdleTimeout(6000000); // 유후 커넥션 유지 시간 (10분)
+
+        dataSource = new HikariDataSource(config);
     }
-=======
->>>>>>> e68776d3e0670cbdbb48ffb4a62e8e45cf6704ff
 
-    // HikariCP - 커넥션 풀 라이브러리
-    implementation 'com.zaxxer:HikariCP:5.1.0'
+    // 사용자가 호출하는 메서드 생성 : 풀에서 커넥션 객체 하나를 빌려 온다.
+    public static Connection getConnection() throws SQLException {
+        return dataSource.getConnection();
+    }
 
-<<<<<<< HEAD
-    // SLF4J → Log4j2 브릿지 - HikariCP가 SLF4J를 사용하므로 Log4j2로 연결
-    implementation 'org.apache.logging.log4j:log4j-slf4j2-impl:2.23.1'
+    // 애플리케이션 종료 시 커넥션 풀을 완전히 닫는다(메모리 누수 발생)
+    public static void close() {
+        if(dataSource != null && !dataSource.isClosed()) {
+            dataSource.close();
+        }
+    }
 
+    // 테스트 코드 작성
+    public static void main(String[] args) {
 
-=======
->>>>>>> e68776d3e0670cbdbb48ffb4a62e8e45cf6704ff
-    // Lombok - @Getter, @Setter, @Builder 등 보일러플레이트 코드 자동 생성
-    compileOnly 'org.projectlombok:lombok:1.18.30'
-    annotationProcessor 'org.projectlombok:lombok:1.18.30'
-
-    // Log4j2 - 애플리케이션 로깅 프레임워크
-    // log4j-api  : 로깅 API (코드에서 import하는 대상)
-    // log4j-core : 실제 로깅 엔진 (설정 파일 읽기, 출력 처리)
-    implementation 'org.apache.logging.log4j:log4j-api:2.23.1'
-    implementation 'org.apache.logging.log4j:log4j-core:2.23.1'
-
-<<<<<<< HEAD
-=======
-    // SLF4J → Log4j2 브릿지 - HikariCP가 SLF4J를 사용하므로 Log4j2로 연결
-    implementation 'org.apache.logging.log4j:log4j-slf4j2-impl:2.23.1'
->>>>>>> e68776d3e0670cbdbb48ffb4a62e8e45cf6704ff
-
-    testImplementation platform('org.junit:junit-bom:5.10.0')
-    testImplementation 'org.junit.jupiter:junit-jupiter'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-}
-
-test {
-    useJUnitPlatform()
-}
-
-compileJava.options.encoding = 'UTF-8'
-
-tasks.withType(JavaExec).configureEach {
-    jvmArgs '-Dfile.encoding=UTF-8'
+        try {
+            DBConnectionManager.getConnection();
+            Thread.sleep(100000);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
