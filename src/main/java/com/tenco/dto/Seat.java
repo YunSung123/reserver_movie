@@ -1,5 +1,13 @@
 package com.tenco.dto;
 
+
+import lombok.*;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString
 public class Seat {
     private int id; // 좌석 정보 ID
     private int roomNumber; // 상영관 번호(PK)
