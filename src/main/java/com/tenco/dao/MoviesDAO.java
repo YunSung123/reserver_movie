@@ -72,7 +72,7 @@ public class MoviesDAO {
                     .id(rs.getInt("id"))
                     .title(rs.getString("title"))
                     .grade(rs.getString("grade"))
-                    .price(rs.getBigDecimal("price"))
+                    .price(rs.getBigDecimal("price"))g
                     .viewCount(rs.getInt("view_count"))
                     .build();
             moviesList.add(movies);
