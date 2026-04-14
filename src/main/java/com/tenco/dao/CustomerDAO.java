@@ -157,7 +157,7 @@ public class CustomerDAO {
         Customer customer = Customer.builder()
                 .id(100)
                 .email("aaa@naver.com")
-                .name("김다똥")
+                .name("aaa")
                 .password("1234")
                 .age(33)
                 .createAt(LocalDate.now())
