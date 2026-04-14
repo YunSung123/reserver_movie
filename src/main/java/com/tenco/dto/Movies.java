@@ -17,4 +17,5 @@ public class Movies {
     private String grade; // 관람 등급
     private BigDecimal price; // 티켓 가격
     private int viewCount; // 누적 관객 수
+    private boolean isAvailable; // 상영관 이용 가능 여부
 }
