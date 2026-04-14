@@ -1,8 +1,17 @@
 package com.tenco.dao;
 
+import com.tenco.dto.Room;
+import com.tenco.util.DBConnectionManager;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
 public class RoomDAO {
-<<<<<<< Updated upstream
-=======
+
     // 현재 상영관에서 상영하는 영화 정보
     public List<Room> findAll() {
         List<Room> roomList = new ArrayList<>();
@@ -44,5 +53,5 @@ public class RoomDAO {
                 .isAvailable(rs.getBoolean(("is_Available")))
                 .build();
     }
->>>>>>> Stashed changes
+
 }

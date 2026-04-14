@@ -17,10 +17,7 @@ public class Movies {
     private String grade; // 관람 등급
     private BigDecimal price; // 티켓 가격
     private int viewCount; // 누적 관객 수
-<<<<<<< Updated upstream
-    private Boolean is_availiable;
-=======
     private Boolean isAvailiable;
     private int roomId;
->>>>>>> Stashed changes
+
 }
