@@ -32,15 +32,21 @@ public class ReserveService {
     // 로그인
     public Customer login(String email,String password) throws SQLException {
         // 로그인 상태 확인용
-        customer = customerDAO.login(email,password);
+        if(customer == null){
+            customer = customerDAO.login(email,password);
+            return customerDAO.login(email,password);
+        }else {
+            return null;
+        }
 
-        return customer;
     }
     // 로그아웃
     public Customer logout(){
 
-        System.out.println("로그아웃 되었습니다.");
-        customer = null;
+        if(customer != null){
+            System.out.println("로그아웃 되었습니다.");
+            customer = null;
+        }
         return customer;
     }
 
