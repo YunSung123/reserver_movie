@@ -76,7 +76,7 @@ public class ReservationDAO {
                 	rs.id AS 예약번호,
                 	c.name AS 고객이름,
                     m.title AS 영화제목,
-                    r.room_number AS 영화관번호,
+                    r.id AS 영화관번호,
                     s.seat_number AS 좌석번호
                 FROM reservation rs
                 INNER JOIN customer c ON rs.customer_id = c.id
