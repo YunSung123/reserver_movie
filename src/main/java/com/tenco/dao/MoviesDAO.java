@@ -40,7 +40,7 @@ public class MoviesDAO {
                         .grade(rs.getString("grade"))
                         .price(rs.getBigDecimal("price"))
                         .viewCount(rs.getInt("view_count"))
-                        .isAvailable(rs.getBoolean("is_availiable"))
+                        .isAvailable(rs.getBoolean("is_available"))
                         .build();
                 moviesList.add(movies);
 
@@ -53,7 +53,6 @@ public class MoviesDAO {
 
     public static List<Movies> findByMovies(String title) throws SQLException {
         List<Movies> moviesList = new ArrayList<>();
-
         String sql = """
                 select * from movies where title like ?
                 """;
@@ -61,7 +60,7 @@ public class MoviesDAO {
         ResultSet rs;
         try (PreparedStatement psmt = conn.prepareStatement(sql)) {
 
-            psmt.setString(1, title);
+            psmt.setString(1, "%" + title + "%");
             rs = psmt.executeQuery();
 
             while (rs.next()) {
@@ -72,16 +71,12 @@ public class MoviesDAO {
                         .grade(rs.getString("grade"))
                         .price(rs.getBigDecimal("price"))
                         .viewCount(rs.getInt("view_count"))
-                        .isAvailable(rs.getBoolean("is_availiable"))
+                        .isAvailable(rs.getBoolean("is_available"))
                         .build();
                 moviesList.add(movies);
             }
-            if (moviesList.isEmpty()) {
-                System.out.println("해당영화는 리스트에 존재하지 않습니다");
-            }
 
         }
-
         return moviesList;
     }
 
@@ -90,8 +85,8 @@ public class MoviesDAO {
     public static Boolean insert(Movies movies) throws SQLException {
 
         String sql = """
-                insert into movies(title,grade,price,room_id)values
-                ( ? , ? , ? ,?)
+                insert into movies(title,grade,price)values
+                ( ? , ? , ? )
                 """;
 
         Connection conn = DBConnectionManager.getConnection();
@@ -99,10 +94,9 @@ public class MoviesDAO {
             psmt.setString(1, movies.getTitle());
             psmt.setString(2, movies.getGrade());
             psmt.setBigDecimal(3, movies.getPrice());
-            psmt.setInt(4, movies.getRoomId());
             psmt.executeUpdate();
         }
-        System.out.println("영화가 추가되었습니다. 제목: " + movies.getTitle());
+
         return true;
 
     }
@@ -122,9 +116,10 @@ public class MoviesDAO {
             psmt.setInt(4, movies.getId());
 
 
+
             psmt.executeUpdate();
         }
-        System.out.println("영화가 수정되었습니다. 수정된 영화: " + movies.getTitle());
+
 
         return true;
     }
@@ -136,7 +131,7 @@ public class MoviesDAO {
         List<Movies> moviesList = new ArrayList<>();
 
         String sql = """
-                update movies set is_availiable = false where title like ?;
+                update movies set is_available = false where title like ?;
                 """;
 
         try (PreparedStatement psmt = conn.prepareStatement(sql)) {
@@ -152,8 +147,6 @@ public class MoviesDAO {
         if (moviesList.isEmpty() == true) {
             return false;
         } else {
-            System.out.println("영화가 소프트 삭제 되었습니다.");
-            System.out.println("삭제된 영화 제목: " + movies.getTitle());
             return true;
         }
 
