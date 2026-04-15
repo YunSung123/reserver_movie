@@ -7,6 +7,7 @@ import com.tenco.dto.Room;
 import com.tenco.dto.Seat;
 import com.tenco.util.DBConnectionManager;
 
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -45,12 +46,11 @@ public class CustomerDAO {
                 return null;
             }
         }
-
-
     }
 
     // 회원가입
     public Customer signup(Customer customer) throws SQLException {
+        System.out.println("회원가입");
         String sql = """
                 insert into customer (email,password,name,age) 
                 values (?,?,?,?)
@@ -74,28 +74,27 @@ public class CustomerDAO {
     }
 
     // 영화 예약 (영화제목으로 받음)
-    public Boolean reserve(Seat seat, Customer customer, Movies movies, int seatNumber) throws SQLException {
+    public Boolean reserve(Seat seat, Customer customer, Movies movies, int seatNumber, Room room) throws SQLException {
         Connection conn = null;
-
-        conn.setAutoCommit(false);
 
         // 트랜잭션 시작
         try {
+            conn = DBConnectionManager.getConnection();
+            conn.setAutoCommit(false);
+
             // 1. findByTitle(String title) - select 제목으로 영화 존재여부 확인
             if (movies == null) {
                 return false;
             }
 
-            if (movies.getRoomId() <= 0) {
+            if (room.getMovieId() <= 0) {
                 return false;
             }
-
-            SeatDAO seatDAO = new SeatDAO();
-            List<Seat> seatList = seatDAO.findAll();
 
             /**
              * room_id 는 PK값
              */
+            System.out.println("여기까지오나요4");
             String seatSelectSql = """
                     select * from seat where seat_number = ? and room_id = ?
                     """;
@@ -109,22 +108,19 @@ public class CustomerDAO {
                 }
             }
 
-
             // 3. 예약 목록(reservation테이블에 예약정보)에 추가 - insert
             String reservationSql = """
                     insert into reservation(customer_id, movie_id, room_id, seat_id)
                     values(?,?,?,?)
                     """;
 
-
             try (PreparedStatement reservePstmt = conn.prepareStatement(reservationSql)) {
-                reservePstmt.setInt(1, customer.getId() );
-                reservePstmt.setInt(2,movies.getId());
-                reservePstmt.setInt(3,movies.getRoomId());
-                reservePstmt.setInt(4,seat.getId());
+                reservePstmt.setInt(1, customer.getId());
+                reservePstmt.setInt(2, movies.getId());
+                reservePstmt.setInt(3, movies.getRoomId());
+                reservePstmt.setInt(4, seat.getId());
                 reservePstmt.executeUpdate();
             }
-
 
             // 4. 좌석 이용 가능 여부 변경 - update
             String sql = """
@@ -134,14 +130,12 @@ public class CustomerDAO {
                     and is_available = true
                     """;
             try (PreparedStatement seatUpdatePstmt = conn.prepareStatement(sql)) {
-                seatUpdatePstmt.setInt(1,seatNumber);
+                seatUpdatePstmt.setInt(1, seatNumber);
                 seatUpdatePstmt.executeUpdate();
 
             }
-
             conn.commit();
             return true;
-
 
         } catch (SQLException e) {
             conn.rollback();
@@ -150,27 +144,37 @@ public class CustomerDAO {
             conn.setAutoCommit(true);
             conn.close();
         }
-
     }
 
-    public static void main(String[] args) {
-        CustomerDAO customerDAO = new CustomerDAO();
-        Customer customer = Customer.builder()
-                .id(100)
-                .email("aaa@naver.com")
-                .name("aaa")
-                .password("1234")
-                .age(33)
-                .createAt(LocalDate.now())
-                .isAvailable(true)
-                .build();
-
-        try {
-//            Customer customer = customerDAO.login("user1@test.com","1234");
-//            System.out.println(customer.getName());
-            customerDAO.signup(customer);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
+//    public static void main(String[] args) throws SQLException {
+//        CustomerDAO customerDAO = new CustomerDAO();
+//        Customer customer = Customer.builder()
+//                .id(100)
+//                .email("aaaaa@naver.com")
+//                .name("aaa")
+//                .password("1234")
+//                .age(33)
+//                .createAt(LocalDate.now())
+//                .isAvailable(true)
+//                .build();
+//// customerDAO.login(customer.getEmail(), customer.getPassword());
+//
+//        System.out.println("-----------------------");
+//        Seat seat = Seat.builder().id(5).build();
+//
+//        int seatNumber = 10;
+//        Movies movies = Movies.builder()
+//                .id(1)
+//                .title("어벤져스")
+//                .grade("12세")
+//                .price(BigDecimal.valueOf(1200.00))
+//                .build();
+//        Room room = Room.builder()
+//                .id(1)
+//                .movieId(1)
+//
+//                .build();
+//        System.out.println("예약");
+//        customerDAO.reserve(seat,customer,movies,seatNumber,room);
+//    }
 }

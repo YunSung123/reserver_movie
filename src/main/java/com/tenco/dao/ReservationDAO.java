@@ -31,8 +31,6 @@ public class ReservationDAO {
                             .name(rs.getString("name"))
                             .age(rs.getInt("age"))
                             .build();
-
-
                 }
             }
             return null;
@@ -47,7 +45,7 @@ public class ReservationDAO {
                     rs.id AS 예약번호,
                     c.name AS 고객이름,
                     m.title AS 영화제목,
-                    rs.is_available AS 결제상태\s
+                    rs.is_available AS 결제상태
                 FROM reservation rs
                 INNER JOIN customer c ON rs.customer_id = c.id
                 INNER JOIN movies m ON rs.movie_id = m.id
@@ -76,7 +74,7 @@ public class ReservationDAO {
                 	rs.id AS 예약번호,
                 	c.name AS 고객이름,
                     m.title AS 영화제목,
-                    r.room_number AS 영화관번호,
+                    r.id AS 영화관번호,
                     s.seat_number AS 좌석번호
                 FROM reservation rs
                 INNER JOIN customer c ON rs.customer_id = c.id
