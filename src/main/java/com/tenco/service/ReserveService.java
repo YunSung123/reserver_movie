@@ -1,10 +1,7 @@
 package com.tenco.service;
 
 import com.tenco.dao.*;
-import com.tenco.dto.Customer;
-import com.tenco.dto.Movies;
-import com.tenco.dto.Room;
-import com.tenco.dto.Seat;
+import com.tenco.dto.*;
 
 import java.math.BigDecimal;
 import java.sql.SQLException;
@@ -37,17 +34,19 @@ public class ReserveService {
             return customer;
         } else {
             return null;
+            return customerDAO.login(email, password);
+        } else {
+            return customer;
         }
 
     }
 
     // 로그아웃
     public Customer logout() {
-        if (customer == null) {
-            System.out.println("로그아웃 상태입니다.");
+        if(customer == null){
+            System.out.println("먼저 로그인 부터 해주세요.");
             return customer;
         }
-
         if (customer != null) {
             System.out.println("로그아웃 되었습니다.");
             customer = null;
@@ -118,6 +117,38 @@ public class ReserveService {
         } else {
             System.out.println("해당영화는 존재하지 않습니다.");
         }
+    }
+
+    //    상영관조회 추가 설명 필요
+
+    //    좌석조회 현재 상영관에서 사용가능한 좌석 조회
+    public List<Seat> findSeat() {
+        List<Seat> seatList = new ArrayList<>();
+        seatList = seatDAO.findAll();
+        return seatList;
+    }
+
+//    결제확인
+
+    public List<Reservation> isPayed() throws SQLException {
+
+        List<Reservation> reservationList = new ArrayList<>();
+        List<Reservation> failPayed = new ArrayList<>(); // 결제 실패 고객
+
+        reservationList = reservationDAO.isPayment();
+
+
+        for (int i = 0; i < reservationList.size(); i++) {
+            if (reservationList.get(i).isStatus() == false) {
+                failPayed.add(reservationList.get(i));
+            }
+        }
+
+        System.out.println("결제가 안된 고객 리스트: " + failPayed);
+        return failPayed;
+    }
+
+//    예약번호조회
 
     }
 
@@ -126,6 +157,10 @@ public class ReserveService {
         List<Movies> moviesList = roomDAO.findAll();
 
         return moviesList;
+//    나의 좌석번호 조회
+
+    public void findMySeat(){
+
     }
 
     // 예약
@@ -133,4 +168,41 @@ public class ReserveService {
         return customerDAO.reserve(seat,customer,movies,room,seatNumber);
     }
 
+    public static void main(String[] args) {
+
+        ReserveService service = new ReserveService();
+//            Customer customer = service.login("user1@test.com","1234");
+//            service.logout();
+//            System.out.println(service.allmovieList());
+//            System.out.println(service.findByMovieTitle("어벤져스:"));
+//            Movies movies = Movies
+//                .builder()
+//                .id(4)
+//                .title("가으루흐")
+//                .grade("123")
+//                .price(new BigDecimal(20000))
+//                .viewCount(0)
+//                .build();
+//            service.movieUpdate(movies);
+//            service.insert(movies);
+//            service.movieDelete(movies);
+//            String id = "user1@test.com";
+//            String password = "1234";
+//            service.login(id,password);
+//        try {
+//            service.isPayed();
+//        } catch (SQLException e) {
+//            throw new RuntimeException(e);
+//        }
+
+    }
+
+    // 좌석 목록
+    public List<Seat> findSeatsByRoomNumber(int roomNumber) throws SQLException {
+        List<Seat> seatList = seatDAO.findByRoomNumber(roomNumber);
+        if (seatList.isEmpty()) {
+            System.out.println("해당 상영관의 좌석이 없습니다.");
+        }
+        return seatList;
+    }
 }

@@ -7,6 +7,7 @@ import com.tenco.dto.Room;
 import com.tenco.dto.Seat;
 import com.tenco.util.DBConnectionManager;
 
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -45,12 +46,11 @@ public class CustomerDAO {
                 return null;
             }
         }
-
-
     }
 
     // 회원가입
     public Customer signup(Customer customer) throws SQLException {
+        System.out.println("회원가입");
         String sql = """
                 insert into customer (email,password,name,age) 
                 values (?,?,?,?)
@@ -78,10 +78,11 @@ public class CustomerDAO {
 
         Connection conn = DBConnectionManager.getConnection();
 
-        conn.setAutoCommit(false);
-
         // 트랜잭션 시작
         try {
+            conn = DBConnectionManager.getConnection();
+            conn.setAutoCommit(false);
+
             // 1. findByTitle(String title) - select 제목으로 영화 존재여부 확인
             if (movies == null) {
                 return false;
@@ -91,16 +92,16 @@ public class CustomerDAO {
                 return false;
             }
 
-
             /**
              * room_id 는 PK값
              */
+
             String seatSelectSql = """
                     select * from seat where seat_number = ? and room_id = ?
                     """;
             try (PreparedStatement seatSelectPstmt = conn.prepareStatement(seatSelectSql)) {
                 seatSelectPstmt.setInt(1, seatNumber);
-                seatSelectPstmt.setInt(2, room.getMovieId());
+                seatSelectPstmt.setInt(2, movies.getRoomId());
                 ResultSet resultSet = seatSelectPstmt.executeQuery();
                 if (!resultSet.next()) {
                     return false;
@@ -109,22 +110,19 @@ public class CustomerDAO {
                 seat.setAvailable(true);
             }
 
-
             // 3. 예약 목록(reservation테이블에 예약정보)에 추가 - insert
             String reservationSql = """
                     insert into reservation(customer_id, movie_id, room_id, seat_id)
                     values(?,?,?,?)
                     """;
 
-
             try (PreparedStatement reservePstmt = conn.prepareStatement(reservationSql)) {
-                reservePstmt.setInt(1, customer.getId() );
-                reservePstmt.setInt(2,movies.getId());
-                reservePstmt.setInt(3,room.getMovieId());
-                reservePstmt.setInt(4,seat.getId());
+                reservePstmt.setInt(1, customer.getId());
+                reservePstmt.setInt(2, movies.getId());
+                reservePstmt.setInt(3, movies.getRoomId());
+                reservePstmt.setInt(4, seat.getId());
                 reservePstmt.executeUpdate();
             }
-
 
             // 4. 좌석 이용 가능 여부 변경 - update
             String sql = """
@@ -134,14 +132,12 @@ public class CustomerDAO {
                     and is_available = true
                     """;
             try (PreparedStatement seatUpdatePstmt = conn.prepareStatement(sql)) {
-                seatUpdatePstmt.setInt(1,seatNumber);
+                seatUpdatePstmt.setInt(1, seatNumber);
                 seatUpdatePstmt.executeUpdate();
 
             }
-
             conn.commit();
             return true;
-
 
         } catch (SQLException e) {
             conn.rollback();
@@ -150,8 +146,5 @@ public class CustomerDAO {
             conn.setAutoCommit(true);
             conn.close();
         }
-
     }
-
-
 }
