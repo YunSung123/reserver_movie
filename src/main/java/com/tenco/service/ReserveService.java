@@ -122,5 +122,12 @@ public class ReserveService {
 
     }
 
-
+    // 좌석 목록
+    public List<Seat> findSeatsByRoomNumber(int roomNumber) throws SQLException {
+        List<Seat> seatList = seatDAO.findByRoomNumber(roomNumber);
+        if (seatList.isEmpty()) {
+            System.out.println("해당 상영관의 좌석이 없습니다.");
+        }
+        return seatList;
+    }
 }
