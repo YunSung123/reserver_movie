@@ -25,21 +25,22 @@ public class ReserveService {
     //회원가입
     public Customer signUp(Customer customer) throws SQLException {
 
-       return customerDAO.signup(customer);
+        return customerDAO.signup(customer);
 
     }
 
     // 로그인
-    public Customer login(String email,String password) throws SQLException {
+    public Customer login(String email, String password) throws SQLException {
         // 로그인 상태 확인용
-        if(customer == null){
-            customer = customerDAO.login(email,password);
-            return customerDAO.login(email,password);
-        }else {
+        if (customer == null) {
+            customer = customerDAO.login(email, password);
+            return customer;
+        } else {
             return null;
         }
 
     }
+
     // 로그아웃
     public Customer logout() {
         if (customer == null) {
@@ -59,7 +60,7 @@ public class ReserveService {
 
     public Boolean reserve(Seat seat, Customer customer, Movies movies, Room room, int seatNumber) throws SQLException {
 
-        return customerDAO.reserve(seat,customer,movies,room,seatNumber);
+        return customerDAO.reserve(seat, customer, movies, room, seatNumber);
 
     }
 
@@ -68,10 +69,10 @@ public class ReserveService {
     public List<Movies> allmovieList() throws SQLException {
         List<Movies> moviesList = new ArrayList<>();
         moviesList = MoviesDAO.findAll();
-        if(moviesList.isEmpty()){
+        if (moviesList.isEmpty()) {
             System.out.println("등록된 영화가 없습니다");
             return null;
-        }else {
+        } else {
             return moviesList;
         }
 
@@ -81,7 +82,7 @@ public class ReserveService {
     public List<Movies> findByMovieTitle(String title) throws SQLException {
         List<Movies> moviesList = new ArrayList<>();
         moviesList = MoviesDAO.findByMovies(title);
-        if(moviesList.isEmpty()){
+        if (moviesList.isEmpty()) {
             System.out.println("해당제목의 영화는 존재하지 않습니다.");
         }
 
@@ -91,10 +92,10 @@ public class ReserveService {
     // 영화 등록
     public Boolean insert(Movies movies) throws SQLException {
 
-        if (MoviesDAO.insert(movies)){
+        if (MoviesDAO.insert(movies)) {
             System.out.println("영화가 추가되었습니다. 제목: " + movies.getTitle());
             return true;
-        }else {
+        } else {
 
             return false;
 
@@ -107,20 +108,29 @@ public class ReserveService {
 
         moviesDAO.update(movies);
         System.out.println("영화가 수정되었습니다. 수정된 영화: " + movies.getTitle());
-
-
     }
+
     // 영화삭제
     public void movieDelete(Movies movies) throws SQLException {
-        if(moviesDAO.softDelete(movies)){
+        if (moviesDAO.softDelete(movies)) {
             System.out.println("영화가 소프트 삭제 되었습니다.");
             System.out.println("삭제된 영화 제목: " + movies.getTitle());
-        }else {
+        } else {
             System.out.println("해당영화는 존재하지 않습니다.");
         }
 
-
     }
 
+    // 상영관 조회
+    public List<Movies> findAllRooms() {
+        List<Movies> moviesList = roomDAO.findAll();
+
+        return moviesList;
+    }
+
+    // 예약
+    public Boolean reserveMovie(Seat seat, Customer customer, Movies movies, Room room, int seatNumber) throws SQLException {
+        return customerDAO.reserve(seat,customer,movies,room,seatNumber);
+    }
 
 }

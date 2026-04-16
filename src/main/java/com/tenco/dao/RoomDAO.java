@@ -16,7 +16,7 @@ public class RoomDAO {
     public List<Movies> findAll() {
         List<Movies> moviesList = new ArrayList<>();
         String sql = """
-                    SELECT title, grade, price, view_count
+                    SELECT room.id, title ,grade, price, view_count, room.is_available
                     FROM movies
                     JOIN room on room.movie_id = movies.id;
                 """;
@@ -54,10 +54,12 @@ public class RoomDAO {
 
     private Movies mapToMovies(ResultSet rs) throws SQLException {
         return Movies.builder()
+                .id(rs.getInt("id"))
                 .title(rs.getString("title"))
                 .grade(rs.getString("grade"))
                 .price(rs.getBigDecimal("price"))
                 .viewCount(rs.getInt("view_count"))
+                .isAvailable(rs.getBoolean("is_available"))
                 .build();
     }
 }

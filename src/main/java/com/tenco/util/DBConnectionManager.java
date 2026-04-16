@@ -22,7 +22,7 @@ public class DBConnectionManager {
         config.setUsername(System.getenv("DB_USER"));
         config.setPassword(System.getenv("DB_PASSWORD"));
 
-        config.setMaximumPoolSize(10); // 동시에 유지할 연결 최대 개수
+        config.setMaximumPoolSize(100); // 동시에 유지할 연결 최대 개수
         config.setMinimumIdle(3);     // 확보할 최소 유후 커넥션 수
         config.setConnectionTimeout(10000); // 커넥션 할당 대기 시간 제한 (5초)
         config.setIdleTimeout(6000000); // 유후 커넥션 유지 시간 (10분)
