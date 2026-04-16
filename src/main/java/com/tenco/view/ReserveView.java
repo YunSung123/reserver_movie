@@ -150,7 +150,7 @@ public class ReserveView {
     // 영화 목록 조회
     private void findAllMovies() throws SQLException {
         System.out.println("\n⚝⚝⚝영화 목록⚝⚝⚝");
-        List<Movies> moviesList = service.allmovieList();
+        List<Movies> moviesList = service.allMovieList();
         if (moviesList.isEmpty()) {
             System.out.println("영화가 존재하지 않습니다");
             return;
@@ -227,7 +227,7 @@ public class ReserveView {
                 int seatNumber = sc.nextInt();
                 Seat seat = Seat.builder()
                         .seatNumber(seatNumber)
-                        .roomNumber(room.getId())
+                        .roomId(room.getId())
                         .build();
                 System.out.println(service.reserve(seat,customer,movies,room,seatNumber));
 
