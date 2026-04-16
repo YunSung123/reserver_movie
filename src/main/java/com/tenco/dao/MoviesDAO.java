@@ -24,7 +24,7 @@ public class MoviesDAO {
         List<Movies> moviesList = new ArrayList<>();
 
         String sql = """
-                select * from movies where is_available = true
+                select * from movies
                 """;
 
         Connection conn = DBConnectionManager.getConnection();

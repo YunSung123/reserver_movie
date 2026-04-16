@@ -41,11 +41,16 @@ public class ReserveService {
 
     }
     // 로그아웃
-    public Customer logout(){
+    public Customer logout() {
+        if (customer == null) {
+            System.out.println("로그아웃 상태입니다.");
+            return customer;
+        }
 
-        if(customer != null){
+        if (customer != null) {
             System.out.println("로그아웃 되었습니다.");
             customer = null;
+            return customer;
         }
         return customer;
     }
@@ -107,8 +112,6 @@ public class ReserveService {
     }
     // 영화삭제
     public void movieDelete(Movies movies) throws SQLException {
-
-
         if(moviesDAO.softDelete(movies)){
             System.out.println("영화가 소프트 삭제 되었습니다.");
             System.out.println("삭제된 영화 제목: " + movies.getTitle());
