@@ -1,10 +1,7 @@
 package com.tenco.service;
 
 import com.tenco.dao.*;
-import com.tenco.dto.Customer;
-import com.tenco.dto.Movies;
-import com.tenco.dto.Room;
-import com.tenco.dto.Seat;
+import com.tenco.dto.*;
 
 import java.math.BigDecimal;
 import java.sql.SQLException;
@@ -25,32 +22,32 @@ public class ReserveService {
     //회원가입
     public Customer signUp(Customer customer) throws SQLException {
 
-       return customerDAO.signup(customer);
+        return customerDAO.signup(customer);
 
     }
 
     // 로그인
-    public Customer login(String email,String password) throws SQLException {
+    public Customer login(String email, String password) throws SQLException {
         // 로그인 상태 확인용
-        if(customer == null){
-            customer = customerDAO.login(email,password);
-            return customerDAO.login(email,password);
-        }else {
+        if (customer == null) {
+            customer = customerDAO.login(email, password);
+            return customerDAO.login(email, password);
+        } else {
             return customer;
         }
 
     }
+
     // 로그아웃
-    public Customer logout(){
-
-
+    public Customer logout() {
         if(customer == null){
-            System.out.println("먼저 로그인부터 해주세요.");
+            System.out.println("먼저 로그인 부터 해주세요.");
             return customer;
         }
-        if(customer != null){
+        if (customer != null) {
             System.out.println("로그아웃 되었습니다.");
             customer = null;
+            return customer;
         }
         return customer;
     }
@@ -59,7 +56,7 @@ public class ReserveService {
 
     public Boolean reserve(Seat seat, Customer customer, Movies movies, Room room, int seatNumber) throws SQLException {
 
-        return customerDAO.reserve(seat,customer,movies,room,seatNumber);
+        return customerDAO.reserve(seat, customer, movies, room, seatNumber);
 
     }
 
@@ -68,10 +65,10 @@ public class ReserveService {
     public List<Movies> allmovieList() throws SQLException {
         List<Movies> moviesList = new ArrayList<>();
         moviesList = MoviesDAO.findAll();
-        if(moviesList.isEmpty()){
+        if (moviesList.isEmpty()) {
             System.out.println("등록된 영화가 없습니다");
             return null;
-        }else {
+        } else {
             return moviesList;
         }
 
@@ -81,7 +78,7 @@ public class ReserveService {
     public List<Movies> findByMovieTitle(String title) throws SQLException {
         List<Movies> moviesList = new ArrayList<>();
         moviesList = MoviesDAO.findByMovies(title);
-        if(moviesList.isEmpty()){
+        if (moviesList.isEmpty()) {
             System.out.println("해당제목의 영화는 존재하지 않습니다.");
         }
 
@@ -91,10 +88,10 @@ public class ReserveService {
     // 영화 등록
     public Boolean insert(Movies movies) throws SQLException {
 
-        if (MoviesDAO.insert(movies)){
+        if (MoviesDAO.insert(movies)) {
             System.out.println("영화가 추가되었습니다. 제목: " + movies.getTitle());
             return true;
-        }else {
+        } else {
 
             return false;
 
@@ -110,29 +107,61 @@ public class ReserveService {
 
 
     }
+
     // 영화삭제
     public void movieDelete(Movies movies) throws SQLException {
-
-
-        if(moviesDAO.softDelete(movies)){
+        if (moviesDAO.softDelete(movies)) {
             System.out.println("영화가 소프트 삭제 되었습니다.");
             System.out.println("삭제된 영화 제목: " + movies.getTitle());
-        }else {
+        } else {
             System.out.println("해당영화는 존재하지 않습니다.");
         }
     }
 
-//    상영관조회
+    //    상영관조회 추가 설명 필요
+    public void findRooms() {
+        roomDAO.findAll(); // 상영관에서
+    }
 
-//    좌석조회
+    //    좌석조회 현재 상영관에서 사용가능한 좌석 조회
+    public List<Seat> findSeat() {
+        List<Seat> seatList = new ArrayList<>();
+        seatList = seatDAO.findAll();
+        return seatList;
+    }
+
 //    결제확인
+
+    public List<Reservation> isPayed() throws SQLException {
+
+        List<Reservation> reservationList = new ArrayList<>();
+        List<Reservation> failPayed = new ArrayList<>(); // 결제 실패 고객
+
+        reservationList = reservationDAO.isPayment();
+
+
+        for (int i = 0; i < reservationList.size(); i++) {
+            if (reservationList.get(i).isStatus() == false) {
+                failPayed.add(reservationList.get(i));
+            }
+        }
+
+        System.out.println("결제가 안된 고객 리스트: " + failPayed);
+        return failPayed;
+    }
+
 //    예약번호조회
+
+
 //    나의 좌석번호 조회
+    public void findMySeat(){
+
+    }
+
 
     public static void main(String[] args) {
 
-        try {
-            ReserveService service = new ReserveService();
+        ReserveService service = new ReserveService();
 //            Customer customer = service.login("user1@test.com","1234");
 //            service.logout();
 //            System.out.println(service.allmovieList());
@@ -148,14 +177,16 @@ public class ReserveService {
 //            service.movieUpdate(movies);
 //            service.insert(movies);
 //            service.movieDelete(movies);
-            String id = "user1@test.com";
-            String password = "1234";
-            service.login(id,password);
+//            String id = "user1@test.com";
+//            String password = "1234";
+//            service.login(id,password);
+//        try {
+//            service.isPayed();
+//        } catch (SQLException e) {
+//            throw new RuntimeException(e);
+//        }
 
-
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
     }
+
 
 }

@@ -24,7 +24,7 @@ public class MoviesDAO {
         List<Movies> moviesList = new ArrayList<>();
 
         String sql = """
-                select * from movies where is_available = true
+                select * from movies
                 """;
 
         Connection conn = DBConnectionManager.getConnection();
@@ -153,27 +153,4 @@ public class MoviesDAO {
 
     }
 
-    public static void main(String[] args) throws SQLException {
-        MoviesDAO moviesDAO = new MoviesDAO();
-//        Movies movies = Movies
-//                .builder()
-//                .id(6)
-//                .title("트")
-//                .grade("1")
-//                .price(new BigDecimal(20000))
-//                .viewCount(0)
-//                .roomId(4)
-//                .build();
-
-//        System.out.println(moviesDAO.findAll());
-//        moviesDAO.insert(movies);
-//        System.out.println(moviesDAO.findByMovies("겨울왕국2"));
-//        moviesDAO.update(movies);
-//        Movies movies = new Movies();
-//        movies.setTitle("겨울왕국2");
-//        System.out.println(moviesDAO.softDelete(movies));
-//    }
-
-
-    }
 }
