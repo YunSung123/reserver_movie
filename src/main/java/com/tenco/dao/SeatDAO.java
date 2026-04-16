@@ -1,5 +1,6 @@
 package com.tenco.dao;
 
+import com.tenco.dto.Room;
 import com.tenco.dto.Seat;
 import com.tenco.util.DBConnectionManager;
 
@@ -12,19 +13,22 @@ import java.util.List;
 
 public class SeatDAO {
     // 현재 좌석 정보
-    public List<Seat> findAll() {
+    public List<Seat> findAll(Room room) {
         List<Seat> seatList = new ArrayList<>();
         String sql = """
-                    SELECT * FROM seat WHERE is_available = true
+                    SELECT * FROM seat WHERE is_available = true and room_id = ?
                 """;
         try (Connection conn = DBConnectionManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql);
-             ResultSet rs = pstmt.executeQuery();
         ) {
-            while (rs.next()) {
+            pstmt.setInt(1,room.getId());
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
 
-                seatList.add(mapToSeat(rs));
+                    seatList.add(mapToSeat(rs));
+                }
             }
+
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

@@ -31,6 +31,9 @@ public class ReserveService {
         // 로그인 상태 확인용
         if (customer == null) {
             customer = customerDAO.login(email, password);
+            return customer;
+        } else {
+            return null;
             return customerDAO.login(email, password);
         } else {
             return customer;
@@ -104,8 +107,6 @@ public class ReserveService {
 
         moviesDAO.update(movies);
         System.out.println("영화가 수정되었습니다. 수정된 영화: " + movies.getTitle());
-
-
     }
 
     // 영화삭제
@@ -149,13 +150,23 @@ public class ReserveService {
 
 //    예약번호조회
 
+    }
 
+    // 상영관 조회
+    public List<Movies> findAllRooms() {
+        List<Movies> moviesList = roomDAO.findAll();
+
+        return moviesList;
 //    나의 좌석번호 조회
 
     public void findMySeat(){
 
     }
 
+    // 예약
+    public Boolean reserveMovie(Seat seat, Customer customer, Movies movies, Room room, int seatNumber) throws SQLException {
+        return customerDAO.reserve(seat,customer,movies,room,seatNumber);
+    }
 
     public static void main(String[] args) {
 

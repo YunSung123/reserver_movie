@@ -75,7 +75,8 @@ public class CustomerDAO {
 
     // 영화 예약 (영화제목으로 받음)
     public Boolean reserve(Seat seat, Customer customer, Movies movies, Room room, int seatNumber) throws SQLException {
-        Connection conn = null;
+
+        Connection conn = DBConnectionManager.getConnection();
 
         // 트랜잭션 시작
         try {
@@ -98,7 +99,6 @@ public class CustomerDAO {
             String seatSelectSql = """
                     select * from seat where seat_number = ? and room_id = ?
                     """;
-            conn = DBConnectionManager.getConnection();
             try (PreparedStatement seatSelectPstmt = conn.prepareStatement(seatSelectSql)) {
                 seatSelectPstmt.setInt(1, seatNumber);
                 seatSelectPstmt.setInt(2, movies.getRoomId());
@@ -106,6 +106,8 @@ public class CustomerDAO {
                 if (!resultSet.next()) {
                     return false;
                 }
+                seat.setId(resultSet.getInt("id"));
+                seat.setAvailable(true);
             }
 
             // 3. 예약 목록(reservation테이블에 예약정보)에 추가 - insert
