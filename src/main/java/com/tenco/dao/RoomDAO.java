@@ -33,7 +33,7 @@ public class RoomDAO {
         }
         return moviesList;
     }
-
+        //3###
     // 이용(개방) 가능 여부 변경
     public Boolean useStatus(Room room) {
         List<Movies> moviesList = new ArrayList<>();
