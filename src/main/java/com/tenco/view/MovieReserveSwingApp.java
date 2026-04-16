@@ -42,8 +42,8 @@ public class MovieReserveSwingApp extends JFrame {
     private final List<SeatButton> seatButtons = new ArrayList<>();
     private final Set<Integer> selectedSeatNumbers = new HashSet<>();
 
-    private static final int ROWS = 5;  // A~E
-    private static final int COLS = 8;  // 1~8
+    private static final int ROWS = 5;
+    private static final int COLS = 8;
 
     public MovieReserveSwingApp() {
         setTitle("영화 예매 시스템");
@@ -358,6 +358,8 @@ public class MovieReserveSwingApp extends JFrame {
             seatGridPanel.add(colLabel);
         }
 
+        int roomNumber = (selectedRoom == null) ? 1 : selectedRoom.getRoomNumber();
+
         for (int r = 1; r <= ROWS; r++) {
             char rowChar = (char) ('A' + r - 1);
             JLabel rowLabel = new JLabel(String.valueOf(rowChar), SwingConstants.CENTER);
@@ -365,9 +367,10 @@ public class MovieReserveSwingApp extends JFrame {
             seatGridPanel.add(rowLabel);
 
             for (int c = 1; c <= COLS; c++) {
-                int seatNumber = r * 100 + c;
+                int seatNumber = roomNumber * 100 + c;
+
                 SeatButton btn = new SeatButton(seatNumber, rowChar + "-" + c);
-                btn.setPreferredSize(new Dimension(70, 48)); // 이미지 크기에 맞게 조절
+                btn.setPreferredSize(new Dimension(70, 48));
                 btn.setAvailableSeat(true);
                 btn.addActionListener(e -> toggleSeat(btn));
                 seatButtons.add(btn);
@@ -684,7 +687,7 @@ public class MovieReserveSwingApp extends JFrame {
 
         List<Movies> movies = new ArrayList<>();
         try {
-            List<Movies> serviceMovies = reserveService.allmovieList();
+            List<Movies> serviceMovies = reserveService.allMovieList();
             if (serviceMovies != null) {
                 movies = serviceMovies;
             }
@@ -854,7 +857,23 @@ public class MovieReserveSwingApp extends JFrame {
 
     private void selectMovie(Movies movie) {
         this.selectedMovie = movie;
-        this.selectedRoom = createSimpleRoomByMovie(movie);
+
+        try {
+            this.selectedRoom = reserveService.findRoomByMovie(movie);
+
+            if (this.selectedRoom == null) {
+                JOptionPane.showMessageDialog(this, "해당 영화의 상영관 정보를 찾을 수 없습니다.");
+                statusLabel.setText("상영관 조회 실패");
+                return;
+            }
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(this, "상영관 정보를 불러오지 못했습니다: " + e.getMessage());
+            statusLabel.setText("상영관 조회 실패");
+            return;
+        }
+
+        System.out.println("[DEBUG] selectedMovie = " + selectedMovie);
+        System.out.println("[DEBUG] selectedRoom  = " + selectedRoom);
 
         clearSeatSelection();
         updateSelectedMoviePreview();
@@ -912,22 +931,18 @@ public class MovieReserveSwingApp extends JFrame {
         }
 
         try {
-            // DB에서 가져온 값 = 이미 예약된 좌석 목록
             List<Seat> reservedSeatList = reserveService.findSeatsByRoomNumber(selectedRoom.getRoomNumber());
 
-            // 일단 전체 좌석을 예약 가능 상태로 초기화
             for (SeatButton btn : seatButtons) {
                 btn.setSelectedSeat(false);
                 btn.setAvailableSeat(true);
             }
 
-            // 예약된 좌석 번호 모음
             Set<Integer> reservedSeatNumbers = new HashSet<>();
             for (Seat seat : reservedSeatList) {
                 reservedSeatNumbers.add(seat.getSeatNumber());
             }
 
-            // 예약된 좌석만 예약 불가 처리
             for (SeatButton btn : seatButtons) {
                 if (reservedSeatNumbers.contains(btn.getSeatNumber())) {
                     btn.setAvailableSeat(false);
@@ -1020,31 +1035,62 @@ public class MovieReserveSwingApp extends JFrame {
     }
 
     private void reserveSelectedSeats() {
+        System.out.println("=== reserveSelectedSeats() 시작 ===");
+
         if (!ensureLoggedIn()) {
+            System.out.println("[DEBUG] ensureLoggedIn() 실패");
             return;
         }
 
         if (selectedMovie == null) {
+            System.out.println("[DEBUG] selectedMovie == null");
             JOptionPane.showMessageDialog(this, "영화를 먼저 선택해주세요.");
             return;
         }
 
+        if (selectedRoom == null) {
+            System.out.println("[DEBUG] selectedRoom == null");
+            JOptionPane.showMessageDialog(this, "상영관 정보가 없습니다.");
+            return;
+        }
+
         if (selectedSeatNumbers.isEmpty()) {
+            System.out.println("[DEBUG] selectedSeatNumbers.isEmpty() == true");
             JOptionPane.showMessageDialog(this, "좌석을 한 개 이상 선택해주세요.");
             return;
         }
 
         if (loginCustomer == null) {
+            System.out.println("[DEBUG] loginCustomer == null");
             JOptionPane.showMessageDialog(this, "로그인 후 이용 가능합니다.");
             return;
         }
+
+        System.out.println("[DEBUG] 로그인 사용자: " + loginCustomer.getName());
+        System.out.println("[DEBUG] 선택 영화: " + selectedMovie.getTitle());
+        System.out.println("[DEBUG] 선택 상영관: " + selectedRoom.getRoomNumber());
+        System.out.println("[DEBUG] 선택 좌석 번호들: " + selectedSeatNumbers);
 
         int successCount = 0;
         List<Integer> selectedSeatCopy = new ArrayList<>(selectedSeatNumbers);
 
         for (Integer seatNumber : selectedSeatCopy) {
+            System.out.println("\n--- 좌석 예약 시도 ---");
+            System.out.println("[DEBUG] seatNumber = " + seatNumber);
+
             try {
-                Seat seat = createSimpleSeat(seatNumber, true);
+                Seat seat = Seat.builder()
+                        .seatNumber(seatNumber)
+                        .roomId(selectedRoom.getId())
+                        .isAvailable(true)
+                        .build();
+
+                System.out.println("[DEBUG] 생성된 seat 객체 = " + seat);
+                System.out.println("[DEBUG] reserveService.reserve() 호출 직전");
+                System.out.println("        customer = " + loginCustomer);
+                System.out.println("        movie    = " + selectedMovie);
+                System.out.println("        room     = " + selectedRoom);
+                System.out.println("        seatNo   = " + seatNumber);
 
                 boolean result = reserveService.reserve(
                         seat,
@@ -1054,26 +1100,44 @@ public class MovieReserveSwingApp extends JFrame {
                         seatNumber
                 );
 
+                System.out.println("[DEBUG] reserve 결과 = " + result);
+
                 if (result) {
                     successCount++;
+                    System.out.println("[DEBUG] successCount 증가 -> " + successCount);
+                } else {
+                    System.out.println("[DEBUG] 예약 실패 반환(false) - seatNumber: " + seatNumber);
                 }
+
             } catch (SQLException ex) {
+                System.out.println("[ERROR] SQLException 발생");
+                ex.printStackTrace();
                 statusLabel.setText("DB 예매 실패: " + ex.getMessage());
             } catch (Exception ex) {
+                System.out.println("[ERROR] Exception 발생");
+                ex.printStackTrace();
                 statusLabel.setText("DTO/DAO 연동 확인 필요");
             }
         }
 
-        clearSeatSelection();
-        refreshSeatGridState();
-        refreshBookingInfo();
+        System.out.println("\n=== 반복문 종료 ===");
+        System.out.println("[DEBUG] 최종 successCount = " + successCount);
 
         if (successCount > 0) {
+            clearSeatSelection();
+            refreshSeatGridState();
+            refreshBookingInfo();
+
             JOptionPane.showMessageDialog(this, successCount + "개 좌석 예매가 완료되었습니다.");
             statusLabel.setText("예매 완료");
+            System.out.println("[DEBUG] 예매 완료 처리");
         } else {
             JOptionPane.showMessageDialog(this, "예매에 실패했습니다.");
+            statusLabel.setText("예매 실패");
+            System.out.println("[DEBUG] successCount <= 0 이므로 예매 실패 메시지 출력");
         }
+
+        System.out.println("=== reserveSelectedSeats() 종료 ===");
     }
 
     private ImageIcon loadPosterByMovieId(int movieId, int width, int height) {
@@ -1133,30 +1197,6 @@ public class MovieReserveSwingApp extends JFrame {
                 .build());
 
         return list;
-    }
-
-    private Room createSimpleRoomByMovie(Movies movie) {
-        try {
-            return Room.builder()
-                    .id(movie.getId())
-                    .roomNumber(movie.getId())
-                    .isAvailable(true)
-                    .build();
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
-    private Seat createSimpleSeat(int seatNumber, boolean available) {
-        try {
-            return Seat.builder()
-                    .seatNumber(seatNumber)
-                    .roomNumber(selectedRoom == null ? 1 : selectedRoom.getRoomNumber())
-                    .isAvailable(available)
-                    .build();
-        } catch (Exception e) {
-            return null;
-        }
     }
 
     private boolean isSelectedMovieCard(int movieId) {

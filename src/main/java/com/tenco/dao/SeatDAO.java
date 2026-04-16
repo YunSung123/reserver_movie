@@ -16,12 +16,11 @@ public class SeatDAO {
     public List<Seat> findAll(Room room) {
         List<Seat> seatList = new ArrayList<>();
         String sql = """
-                    SELECT * FROM seat WHERE is_available = true and room_id = ?
+                    SELECT * FROM seat WHERE is_available = true
                 """;
         try (Connection conn = DBConnectionManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql);
         ) {
-            pstmt.setInt(1,room.getId());
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {
 
@@ -80,7 +79,7 @@ public class SeatDAO {
                 while (rs.next()) {
                     Seat seat = Seat.builder()
                             .id(rs.getInt("id"))
-                            .roomNumber(rs.getInt("room_id"))
+                            //.roomId(rs.getInt("room_id"))
                             .seatNumber(rs.getInt("seat_number"))
                             .isAvailable(rs.getBoolean("is_available"))
                             .build();
