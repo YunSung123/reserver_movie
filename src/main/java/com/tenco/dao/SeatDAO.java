@@ -48,10 +48,11 @@ public class SeatDAO {
         }
     }
 
+
     private Seat mapToSeat(ResultSet rs) throws SQLException {
         return Seat.builder()
                 .id(rs.getInt("id"))
-                .roomNumber(rs.getInt("room_Number"))
+                .roomId(rs.getInt("room_id"))
                 .seatNumber(rs.getInt("seat_Number"))
                 .isAvailable(rs.getBoolean("is_available"))
                 .build();
