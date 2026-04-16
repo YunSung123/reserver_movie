@@ -36,13 +36,18 @@ public class ReserveService {
             customer = customerDAO.login(email,password);
             return customerDAO.login(email,password);
         }else {
-            return null;
+            return customer;
         }
 
     }
     // 로그아웃
     public Customer logout(){
 
+
+        if(customer == null){
+            System.out.println("먼저 로그인부터 해주세요.");
+            return customer;
+        }
         if(customer != null){
             System.out.println("로그아웃 되었습니다.");
             customer = null;
@@ -115,9 +120,14 @@ public class ReserveService {
         }else {
             System.out.println("해당영화는 존재하지 않습니다.");
         }
-
-
     }
+
+//    상영관조회
+
+//    좌석조회
+//    결제확인
+//    예약번호조회
+//    나의 좌석번호 조회
 
     public static void main(String[] args) {
 
@@ -127,17 +137,22 @@ public class ReserveService {
 //            service.logout();
 //            System.out.println(service.allmovieList());
 //            System.out.println(service.findByMovieTitle("어벤져스:"));
-            Movies movies = Movies
-                .builder()
-                .id(4)
-                .title("가으루흐")
-                .grade("123")
-                .price(new BigDecimal(20000))
-                .viewCount(0)
-                .build();
+//            Movies movies = Movies
+//                .builder()
+//                .id(4)
+//                .title("가으루흐")
+//                .grade("123")
+//                .price(new BigDecimal(20000))
+//                .viewCount(0)
+//                .build();
 //            service.movieUpdate(movies);
 //            service.insert(movies);
-            service.movieDelete(movies);
+//            service.movieDelete(movies);
+            String id = "user1@test.com";
+            String password = "1234";
+            service.login(id,password);
+
+
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
