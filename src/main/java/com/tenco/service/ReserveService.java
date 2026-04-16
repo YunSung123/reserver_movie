@@ -122,28 +122,5 @@ public class ReserveService {
 
     }
 
-    public static void main(String[] args) {
-
-        try {
-            ReserveService service = new ReserveService();
-//            Customer customer = service.login("user1@test.com","1234");
-//            service.logout();
-//            System.out.println(service.allmovieList());
-//            System.out.println(service.findByMovieTitle("어벤져스:"));
-            Movies movies = Movies
-                .builder()
-                .id(4)
-                .title("가으루흐")
-                .grade("123")
-                .price(new BigDecimal(20000))
-                .viewCount(0)
-                .build();
-//            service.movieUpdate(movies);
-//            service.insert(movies);
-            service.movieDelete(movies);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
 }
