@@ -119,9 +119,6 @@ public class ReserveService {
     }
 
     //    상영관조회 추가 설명 필요
-    public void findRooms() {
-        roomDAO.findAll(); // 상영관에서
-    }
 
     //    좌석조회 현재 상영관에서 사용가능한 좌석 조회
     public List<Seat> findSeat() {
