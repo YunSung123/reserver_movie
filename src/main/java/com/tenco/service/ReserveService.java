@@ -154,6 +154,7 @@ public class ReserveService {
 
 
 //    나의 좌석번호 조회
+
     public void findMySeat(){
 
     }
