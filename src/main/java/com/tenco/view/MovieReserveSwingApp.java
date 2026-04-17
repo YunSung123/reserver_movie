@@ -1,9 +1,6 @@
 package com.tenco.view;
 
-import com.tenco.dto.Customer;
-import com.tenco.dto.Movies;
-import com.tenco.dto.Room;
-import com.tenco.dto.Seat;
+import com.tenco.dto.*;
 import com.tenco.service.ReserveService;
 
 import javax.imageio.ImageIO;
@@ -36,7 +33,7 @@ public class MovieReserveSwingApp extends JFrame {
 
     private Movies selectedMovie;
     private Room selectedRoom;
-    private Customer loginCustomer;
+    private User loginUser;
     private JLabel loginStatusLabel;
 
     private final List<SeatButton> seatButtons = new ArrayList<>();
@@ -382,15 +379,15 @@ public class MovieReserveSwingApp extends JFrame {
         seatGridPanel.repaint();
     }
 
-    private void updateLoginStatusLabel() {
+    public void updateLoginStatusLabel() {
         if (loginStatusLabel == null) {
             return;
         }
 
-        if (loginCustomer == null) {
+        if (loginUser == null) {
             loginStatusLabel.setText("로그인 상태: 비로그인");
         } else {
-            loginStatusLabel.setText("로그인 상태: " + loginCustomer.getName());
+            loginStatusLabel.setText("로그인 상태: " + loginUser.getName());
         }
     }
 
@@ -487,16 +484,28 @@ public class MovieReserveSwingApp extends JFrame {
         }
 
         try {
-            Customer customer = reserveService.login(email, password);
-            if (customer != null) {
-                loginCustomer = customer;
+            User user = reserveService.login(email, password);
+
+            if (user != null) {
+                loginUser = user;
                 updateLoginStatusLabel();
                 refreshBookingInfo();
-                statusLabel.setText("로그인 성공: " + customer.getName());
-                JOptionPane.showMessageDialog(this, customer.getName() + "님 로그인되었습니다.");
+
+                if (user instanceof Customer) {
+                    loginUser = (Customer) user;
+                    statusLabel.setText("로그인 성공 (고객): " + user.getName());
+                    JOptionPane.showMessageDialog(this, user.getName() + "님 로그인되었습니다.");
+
+                } else if (user instanceof Admin) {
+                    statusLabel.setText("관리자 로그인: " + user.getName());
+                    JOptionPane.showMessageDialog(this, "관리자 " + user.getName() + "님 로그인");
+
+                }
+
             } else {
                 JOptionPane.showMessageDialog(this, "로그인에 실패했습니다. 계정을 확인해주세요.");
             }
+
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "로그인 중 오류: " + e.getMessage());
         }
@@ -508,7 +517,7 @@ public class MovieReserveSwingApp extends JFrame {
         } catch (Exception ignored) {
         }
 
-        loginCustomer = null;
+        loginUser = null;
         updateLoginStatusLabel();
         refreshBookingInfo();
         statusLabel.setText("로그아웃 되었습니다.");
@@ -516,6 +525,16 @@ public class MovieReserveSwingApp extends JFrame {
     }
 
     private void showAddMovieDialog() {
+        if (!(loginUser instanceof Admin)) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "관리자만 영화 등록이 가능합니다.",
+                    "권한 없음",
+                    JOptionPane.WARNING_MESSAGE
+            );
+            return;
+        }
+
         JTextField titleField = new JTextField();
         JTextField gradeField = new JTextField();
         JTextField priceField = new JTextField();
@@ -575,6 +594,18 @@ public class MovieReserveSwingApp extends JFrame {
     }
 
     private void showUpdateMovieDialog() {
+
+        if (!(loginUser instanceof Admin)) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "관리자만 영화 수정이 가능합니다.",
+                    "권한 없음",
+                    JOptionPane.WARNING_MESSAGE
+            );
+            return;
+        }
+
+
         if (selectedMovie == null) {
             JOptionPane.showMessageDialog(this, "수정할 영화를 먼저 선택해주세요.");
             return;
@@ -632,6 +663,17 @@ public class MovieReserveSwingApp extends JFrame {
     }
 
     private void deleteSelectedMovie() {
+
+        if (!(loginUser instanceof Admin)) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "관리자만 영화 삭제가 가능합니다.",
+                    "권한 없음",
+                    JOptionPane.WARNING_MESSAGE
+            );
+            return;
+        }
+
         if (selectedMovie == null) {
             JOptionPane.showMessageDialog(this, "삭제할 영화를 먼저 선택해주세요.");
             return;
@@ -665,7 +707,7 @@ public class MovieReserveSwingApp extends JFrame {
     }
 
     private boolean ensureLoggedIn() {
-        if (loginCustomer != null) {
+        if (loginUser != null) {
             return true;
         }
 
@@ -679,7 +721,7 @@ public class MovieReserveSwingApp extends JFrame {
         if (choice == JOptionPane.YES_OPTION) {
             showLoginDialog();
         }
-        return loginCustomer != null;
+        return loginUser != null;
     }
 
     private void loadMovies() {
@@ -1014,9 +1056,9 @@ public class MovieReserveSwingApp extends JFrame {
         selectedSeatLabel.setText("선택 좌석: " + String.join(", ", labels));
     }
 
-    private void refreshBookingInfo() {
+    public void refreshBookingInfo() {
         bookingInfoModel.clear();
-        bookingInfoModel.addElement("로그인 사용자: " + (loginCustomer == null ? "비로그인" : loginCustomer.getName()));
+        bookingInfoModel.addElement("로그인 사용자: " + (loginUser == null ? "비로그인" : loginUser.getName()));
         bookingInfoModel.addElement("영화: " + (selectedMovie == null ? "선택 안됨" : selectedMovie.getTitle()));
         bookingInfoModel.addElement("상영관: " + (selectedRoom == null ? "없음" : selectedRoom.getRoomNumber() + "관"));
 
@@ -1065,13 +1107,13 @@ public class MovieReserveSwingApp extends JFrame {
             return;
         }
 
-        if (loginCustomer == null) {
+        if (loginUser == null) {
             System.out.println("[DEBUG] loginCustomer == null");
             JOptionPane.showMessageDialog(this, "로그인 후 이용 가능합니다.");
             return;
         }
 
-        System.out.println("[DEBUG] 로그인 사용자: " + loginCustomer.getName());
+        System.out.println("[DEBUG] 로그인 사용자: " + loginUser.getName());
         System.out.println("[DEBUG] 선택 영화: " + selectedMovie.getTitle());
         System.out.println("[DEBUG] 선택 상영관: " + selectedRoom.getRoomNumber());
         System.out.println("[DEBUG] 선택 좌석 번호들: " + selectedSeatNumbers);
@@ -1092,14 +1134,14 @@ public class MovieReserveSwingApp extends JFrame {
 
                 System.out.println("[DEBUG] 생성된 seat 객체 = " + seat);
                 System.out.println("[DEBUG] reserveService.reserve() 호출 직전");
-                System.out.println("        customer = " + loginCustomer);
+                System.out.println("        customer = " + loginUser);
                 System.out.println("        movie    = " + selectedMovie);
                 System.out.println("        room     = " + selectedRoom);
                 System.out.println("        seatNo   = " + seatNumber);
 
                 boolean result = reserveService.reserve(
                         seat,
-                        loginCustomer,
+                        (Customer) loginUser,
                         selectedMovie,
                         selectedRoom,
                         seatNumber
@@ -1223,20 +1265,6 @@ public class MovieReserveSwingApp extends JFrame {
             }
         }
         movieListPanel.repaint();
-    }
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            try {
-                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-            } catch (Exception ignored) {
-            }
-
-            MovieReserveSwingApp app = new MovieReserveSwingApp();
-            app.updateLoginStatusLabel();
-            app.refreshBookingInfo();
-            app.setVisible(true);
-        });
     }
 
     static class SeatButton extends JButton {

@@ -1,15 +1,7 @@
 package com.tenco.service;
 
-import com.tenco.dao.CustomerDAO;
-import com.tenco.dao.MoviesDAO;
-import com.tenco.dao.ReservationDAO;
-import com.tenco.dao.RoomDAO;
-import com.tenco.dao.SeatDAO;
-import com.tenco.dto.Customer;
-import com.tenco.dto.Movies;
-import com.tenco.dto.Reservation;
-import com.tenco.dto.Room;
-import com.tenco.dto.Seat;
+import com.tenco.dao.*;
+import com.tenco.dto.*;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -22,34 +14,52 @@ public class ReserveService {
     private final RoomDAO roomDAO = new RoomDAO();
     private final SeatDAO seatDAO = new SeatDAO();
     private static final CustomerDAO customerDAO = new CustomerDAO();
+    private static final AdminDAO adminDAO = new AdminDAO();
 
-    private Customer customer; // 현재 로그인한 사용자
+    private User user; // 현재 로그인한 사용자
 
     // 회원가입
     public Customer signUp(Customer customer) throws SQLException {
         return customerDAO.signup(customer);
     }
 
-    // 로그인
-    public Customer login(String email, String password) throws SQLException {
-        if (customer == null) {
-            customer = customerDAO.login(email, password);
-            return customer;
+    public User login(String id, String password) throws SQLException {
+
+        if (user == null) {
+
+            // 1. 관리자 먼저 조회
+            Admin admin = adminDAO.login(id, password);
+            if (admin != null) {
+                System.out.println("관리자 로그인");
+                user = admin;
+                return user;
+            }
+
+            // 2. 고객 조회
+            Customer customer = customerDAO.login(id, password);
+            if (customer != null) {
+                System.out.println("일반 사용자 로그인");
+                user = customer;
+                return user;
+            }
+
+            System.out.println("로그인 실패");
+            return null;
         }
 
         System.out.println("이미 로그인된 사용자입니다.");
-        return customer;
+        return user;
     }
 
     // 로그아웃
-    public Customer logout() {
-        if (customer == null) {
+    public User logout() {
+        if (user == null) {
             System.out.println("먼저 로그인부터 해주세요.");
             return null;
         }
 
         System.out.println("로그아웃 되었습니다.");
-        customer = null;
+        user = null;
         return null;
     }
 
