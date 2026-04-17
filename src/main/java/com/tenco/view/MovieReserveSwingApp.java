@@ -35,6 +35,8 @@ public class MovieReserveSwingApp extends JFrame {
     private Room selectedRoom;
     private User loginUser;
     private JLabel loginStatusLabel;
+    private JButton loginButton;
+    private JButton logoutButton;
 
     private final List<SeatButton> seatButtons = new ArrayList<>();
     private final Set<Integer> selectedSeatNumbers = new HashSet<>();
@@ -94,10 +96,10 @@ public class MovieReserveSwingApp extends JFrame {
         JButton signUpButton = createAccentButton("회원가입");
         signUpButton.addActionListener(e -> showSignUpDialog());
 
-        JButton loginButton = createAccentButton("로그인");
+        loginButton = createAccentButton("로그인");
         loginButton.addActionListener(e -> showLoginDialog());
 
-        JButton logoutButton = createGrayButton("로그아웃");
+        logoutButton = createGrayButton("로그아웃");
         logoutButton.addActionListener(e -> logoutAction());
 
         JButton addMovieButton = createAccentButton("영화 등록");
@@ -119,7 +121,20 @@ public class MovieReserveSwingApp extends JFrame {
 
         header.add(left, BorderLayout.WEST);
         header.add(right, BorderLayout.EAST);
+
+        updateAuthButtons();
+
         return header;
+    }
+    private void updateAuthButtons() {
+        if (loginButton == null || logoutButton == null) {
+            return;
+        }
+
+        boolean loggedIn = (loginUser != null);
+
+        loginButton.setVisible(!loggedIn);
+        logoutButton.setVisible(loggedIn);
     }
 
     private JComponent buildCenter() {
@@ -389,6 +404,8 @@ public class MovieReserveSwingApp extends JFrame {
         } else {
             loginStatusLabel.setText("로그인 상태: " + loginUser.getName());
         }
+
+        updateAuthButtons();
     }
 
     private void showSignUpDialog() {
