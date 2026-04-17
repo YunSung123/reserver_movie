@@ -135,6 +135,11 @@ public class ReserveService {
         // TODO: 구현 필요
     }
 
+    public List<Seat> findAllSeatsByRoom(Room room) throws SQLException {
+        SeatDAO seatDAO = new SeatDAO();
+        return seatDAO.findAll(room);
+    }
+
     // 영화 예약
     public Boolean reserveMovie(Seat seat, Customer customer, Movies movies, Room room, int seatNumber)
             throws SQLException {

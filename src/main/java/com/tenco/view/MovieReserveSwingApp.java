@@ -367,7 +367,7 @@ public class MovieReserveSwingApp extends JFrame {
             seatGridPanel.add(rowLabel);
 
             for (int c = 1; c <= COLS; c++) {
-                int seatNumber = roomNumber * 100 + c;
+                int seatNumber = (r - 1) * COLS + c;
 
                 SeatButton btn = new SeatButton(seatNumber, rowChar + "-" + c);
                 btn.setPreferredSize(new Dimension(70, 48));
@@ -920,6 +920,7 @@ public class MovieReserveSwingApp extends JFrame {
     }
 
     private void refreshSeatGridState() {
+
         if (selectedRoom == null) {
             for (SeatButton btn : seatButtons) {
                 btn.setSelectedSeat(false);
@@ -931,21 +932,25 @@ public class MovieReserveSwingApp extends JFrame {
         }
 
         try {
-            List<Seat> reservedSeatList = reserveService.findSeatsByRoomNumber(selectedRoom.getRoomNumber());
+            // ⭐ 모든 좌석 조회
+            List<Seat> seatList = reserveService.findAllSeatsByRoom(selectedRoom);
 
+            // ⭐ seatNumber → isAvailable 매핑
+            Map<Integer, Boolean> seatMap = new HashMap<>();
+            for (Seat seat : seatList) {
+                seatMap.put(seat.getSeatNumber(), seat.isAvailable());
+            }
+
+            // ⭐ 버튼 상태 반영
             for (SeatButton btn : seatButtons) {
                 btn.setSelectedSeat(false);
-                btn.setAvailableSeat(true);
-            }
 
-            Set<Integer> reservedSeatNumbers = new HashSet<>();
-            for (Seat seat : reservedSeatList) {
-                reservedSeatNumbers.add(seat.getSeatNumber());
-            }
+                boolean isAvailable = seatMap.getOrDefault(btn.getSeatNumber(), true);
 
-            for (SeatButton btn : seatButtons) {
-                if (reservedSeatNumbers.contains(btn.getSeatNumber())) {
-                    btn.setAvailableSeat(false);
+                if (isAvailable) {
+                    btn.setAvailableSeat(true);   // 예약 가능
+                } else {
+                    btn.setAvailableSeat(false);  // 예약됨
                 }
             }
 
