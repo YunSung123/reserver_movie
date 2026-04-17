@@ -2,10 +2,7 @@ package com.tenco.view;
 
 
 import com.tenco.dao.SeatDAO;
-import com.tenco.dto.Customer;
-import com.tenco.dto.Movies;
-import com.tenco.dto.Room;
-import com.tenco.dto.Seat;
+import com.tenco.dto.*;
 import com.tenco.service.ReserveService;
 
 import java.sql.SQLException;
@@ -17,7 +14,7 @@ public class ReserveView {
     private final ReserveService service = new ReserveService();
     private final Scanner sc = new Scanner(System.in);
 
-    Customer customer;
+    User user;
     private Integer currentCustomerId = null; // 로그인 중인 고객 아이디
     private String currentCustomerName = null; // 로그인 중인 고객 이름
 
@@ -97,9 +94,9 @@ public class ReserveView {
         String pw = sc.next();
 
 
-        customer = service.login(email, pw);
-        currentCustomerId = customer.getId();
-        currentCustomerName = customer.getName();
+        user = service.login(email, pw);
+        currentCustomerId = user.getId();
+        currentCustomerName = user.getName();
     }
 
     // 로그아웃
@@ -196,6 +193,7 @@ public class ReserveView {
     }
 
     private void reserve() throws SQLException {
+        Customer customer = (Customer) user;
         System.out.print("어떤 영화를 보실지 입력해 주세요: ");
         String title = sc.next().trim();
         Movies movies = new Movies();
